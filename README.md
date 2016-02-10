@@ -135,3 +135,8 @@ For a V1 I want to have this feature set completed:
 	-	[x] duration
   - [x] password
   -	[x] custom string formats
+
+
+Companies House fork adds "x-versions" to PathItem object, providing versioning information
+for their Swaggerly documentation generator. This is parsed internally as a PathVersions object
+on PathItem.
