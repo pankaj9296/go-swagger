@@ -350,6 +350,9 @@ func ExpandSchema(schema *Schema, root interface{}, cache ResolutionCache) error
 }
 
 func expandSchema(schema *Schema, resolver *schemaLoader) error {
+	//_, file, line, _ := runtime.Caller(1)
+	//fmt.Printf("expandSchema call %s : %d\n", file, line)
+
 	if schema == nil {
 		return nil
 	}
@@ -358,6 +361,7 @@ func expandSchema(schema *Schema, resolver *schemaLoader) error {
 		*schema = *resolver.root.(*Schema)
 		return nil
 	}
+
 	// create a schema expander and run that
 	if schema.Ref.String() != "" {
 		currentSchema := *schema
@@ -371,19 +375,28 @@ func expandSchema(schema *Schema, resolver *schemaLoader) error {
 		*schema = currentSchema
 	}
 
+	//fmt.Printf("RECURSE '%s' ?\n", schema.Description)
 	if schema.Items != nil {
+		//fmt.Printf("+++ has Items\n")
 		if schema.Items.Schema != nil {
+			//fmt.Printf("+++ has Items.Schema\n")
+			//fmt.Printf("GOT schema.Items.Schema\n")
+			//spew.Dump(schema.Items)
 			sch := schema.Items.Schema
 			if sch.Ref.String() != "" || sch.Ref.IsRoot() {
+				//fmt.Printf("--- expandSchema\n")
 				if err := expandSchema(sch, resolver); err != nil {
 					return err
 				}
 
 			}
 		}
+		//fmt.Printf("RANGE over schema.Items.Schema\n")
 		for i := range schema.Items.Schemas {
+			//fmt.Printf("--- Processing %s\n", i)
 			sch := &(schema.Items.Schemas[i])
 			if sch.Ref.String() != "" || sch.Ref.IsRoot() {
+				//fmt.Printf("--- --- expandSchema\n")
 				if err := expandSchema(sch, resolver); err != nil {
 					return err
 				}
@@ -427,11 +440,18 @@ func expandSchema(schema *Schema, resolver *schemaLoader) error {
 		}
 	}
 	for k, v := range schema.Properties {
+		//fmt.Printf("Check property %s\n", k)
+		//spew.Dump(v)
 		if v.Ref.String() != "" || v.Ref.IsRoot() {
 			if err := expandSchema(&v, resolver); err != nil {
 				return err
 			}
-
+		}
+		if v.Type.Contains("array") {
+			//fmt.Printf("GOT ARRAY PROPERTY\n")
+			if err := expandSchema(&v, resolver); err != nil {
+				return err
+			}
 		}
 		schema.Properties[k] = v
 	}
@@ -459,7 +479,6 @@ func expandSchema(schema *Schema, resolver *schemaLoader) error {
 				}
 
 			}
-
 			schema.Dependencies[k] = v
 		}
 	}
@@ -592,7 +611,6 @@ func expandParameter(parameter *Parameter, resolver *schemaLoader) error {
 		if err := expandSchema(parameter.Schema, resolver); err != nil {
 			return err
 		}
-
 	}
 	return nil
 }
