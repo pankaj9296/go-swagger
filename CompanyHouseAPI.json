@@ -1,0 +1,74 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "v1",
+    "title": "Companies House API",
+    "description":"Companies House API swagger"
+  },
+  "host": "api.companieshouse.gov.uk",
+  "schemes": [
+    "https"                      
+  ],
+  "securityDefinitions":{
+    "Authorization": {
+      "type": "basic",
+      "description": "Companies House API takes the username as the API key and ignores the password"
+    }
+  },
+  "paths": {
+    "\/search": {
+      "get": {
+        "operationId": "search",
+        "security":[{
+            "Authorization": []
+        }],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "description": "The term being searched for.",
+            "required": true,
+            "type": "string",
+            "format": "string"
+          },
+          {
+            "name": "items_per_page",
+            "in": "query",
+            "description": "The number of search results to return per page.",
+            "required": false,
+            "type": "number",
+            "format": "integer"
+          },
+          {
+            "name": "start_index",
+            "in": "query",
+            "description": "The index of the first result item to return.",
+            "required": false,
+            "type": "number",
+            "format": "integer"
+          }
+        ],
+        "produces": [
+          "application\/json",
+          "text\/plain",
+          "text\/plain, *\/*; q=0.01"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "deprecated": false
+      }
+    }
+  },
+  "definitions": {
+    
+  }
+}
